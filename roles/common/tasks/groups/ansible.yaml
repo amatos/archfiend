@@ -3,3 +3,5 @@
     name:
       - ansible # well you are running this playbook with it ¯\_(ツ)_/¯
       - sshpass # used for ansible when using -k
+      - ansible-collection-community-general
+      - ansible-collection-kewlfft-aur

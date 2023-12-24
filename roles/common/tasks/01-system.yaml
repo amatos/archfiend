@@ -8,6 +8,9 @@
       - base-devel
       - networkmanager
       - zsh
+      - sbctl
+      - sbctl-initcpio-post-hook
+      - fish
     update_cache: yes
   become: true
 

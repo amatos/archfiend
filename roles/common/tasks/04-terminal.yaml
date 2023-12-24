@@ -25,6 +25,56 @@
       - youtube-dl # download videos from the net
       - zsh # shell
       - fish # shell
+      - bees # Best-Effort Extent-Same (BTRFS)
+      - btrfs-assistant
+      - cups-pdf # pdf printer
+      - cups-pk-helper # cups gui
+      - find-the-command # find commands
+      - fzf # fuzzy finder
+      - hunspell # spell checker
+      - hunspell-en_us # spell checker (English)
+      - hunspell-pt-br # spell checker (Brazilian Portuguese)
+      - less # pager
+      - logrotate # log rotation
+      - lsof
+      - man-db
+      - man-pages
+      - mlocate # locate
+      - onedriver
+      - parted
+      - rsync
+      - sane
+      - sane-airscan
+      - tldr # Don't have time for manpages? tldr!
+      - unarchiver
+
+
+- name: TERMINAL - Development apps
+  kewlfft.aur.aur:
+    name:
+      - jdk-openjdk # java
+      - goKDE
+      - clang
+      - rust
+      - gdb
+      - lldb
+      - nodejs
+      - npm
+      - python
+      - python-pip
+      - python-pipx
+      - python-wheel
+      - python-setuptools
+      - ninja
+      - cmake
+      - make
+      - meson
+      - perl
+      - ruby
+      - tcl
+      - tk
+
+
 
 - name: TERMINAL - Install app groups
   include_tasks: "groups/{{ item }}.yaml"

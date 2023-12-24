@@ -27,6 +27,54 @@
       - sddm # display manager, serves login shell
       - ttf-google-sans # google fond for system (ZIP DOWNLOAD NOT WORKING)
       - xorg # display server needed for xwayland
+      - audiocd-kio # kde audio cd support
+      - kdegraphics-thumbnailers # kde thumbnailers
+      - kdegraphics-mobipocket # kde mobipocket support
+      - colord
+      - colord-kde
+      - colord-sane
+      - kleopatra
+      - kdenlive # video editor
+      - yakuake # drop down terminal
+      - kcalc # calculator
+      - kdeconnect # connect phone to pc
+      - kio-admin
+      - kio-extras
+      - kio-stash
+      - kio-zeroconf
+      - konsole # terminal
+      - ksystemlog # system log viewer
+      - kwallet5 # kde wallet
+      - kwallet-pam
+      - power-profiles-daemon
+      - powerdevil
+      - print-manager
+      - system-config-printer
+
+
+
+- name: install GUI apps
+  kewlfft.aur.aur:
+    name:
+      - thunderbird # email client
+      - inkscape # vector graphics editor
+      - krita # raster graphics editor
+      - gimp # raster graphics editor
+      - blender # 3d graphics editor
+      - jetbrains-toolbox # jetbrains ide manager
+      - languagetool
+      - libreoffice-fresh # office suite
+      - latte-dock
+      - obsidian
+      - plymouth-kcm
+      - plymouth-theme-monoarch
+      - proton-up
+      - steam
+
+
+
+
+
 
 - name: Install vendor fonts
   kewlfft.aur.aur:
