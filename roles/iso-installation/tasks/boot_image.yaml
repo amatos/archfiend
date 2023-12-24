@@ -1,0 +1,2 @@
+- name: Run mkinitcpio
+  command: arch-chroot /mnt mkinitcpio -P

@@ -1,0 +1,98 @@
+# Most steps taking from the install guide at:
+# https://wiki.archlinux.org/title/installation_guide#Acquire_an_installation_image
+
+- name: set encryption, btrfs, and boot loader facts
+  set_fact:
+    hostname: "{{ hostname | default(inventory_hostname | replace('_','-'))}}"
+    use_encryption: "{{ encryption is defined and encryption.enabled }}"
+    use_btrfs: "{{ btrfs is defined and btrfs.enabled }}"
+    root_part: "{{ manual_partitions.root | default(install_drive + '2')}}"
+    boot_part: "{{ manual_partitions.boot | default(install_drive + '1')}}"
+    crypto_container: "{{ crypto_container | default('cryptroot')}}"
+    use_systemd_boot: "{{ boot_loader is defined and boot_loader == 'systemd-boot' }}"
+    use_grub: "{{ boot_loader is not defined or boot_loader == 'grub' }}"
+
+- name: Abort if the host is not booted from the Arch install media
+  fail:
+    msg: "This host is not booted from the Arch install media!"
+  when: ansible_nodename != 'archiso'
+
+- name: Synchronize clock via NTP
+  command: timedatectl set-ntp true
+
+- import_tasks: partitions.yaml
+  tags: partitions
+
+- import_tasks: encryption.yaml
+  tags: encryption
+  when: use_encryption
+
+- import_tasks: filesystem.yaml
+  tags: filesystem
+
+- import_tasks: btrfs.yaml
+  tags: btrfs
+  when: use_btrfs
+
+- name: Create mountpoint for boot volume
+  file:
+    path: /mnt/boot/efi
+    state: directory
+
+- name: Mount boot filesystem
+  mount:
+    path: /mnt/boot/efi
+    src: "{{ boot_part }}"
+    fstype: vfat
+    state: mounted
+
+- import_tasks: install.yaml
+  tags: install
+
+- name: Generate fstab
+  block:
+    - name: Generate fstab file
+      shell: genfstab -U /mnt > /mnt/etc/fstab
+
+- import_tasks: local_time.yaml
+  tags: local_time
+
+- import_tasks: locale.yaml
+  tags: locale
+
+- name: Enable NetworkManger for connectivity at boot
+  command: arch-chroot /mnt systemctl enable NetworkManager
+
+- name: Enable sshd
+  command: arch-chroot /mnt systemctl enable sshd
+
+- import_tasks: ramdisk.yaml
+  tags: ramdisk
+
+- import_tasks: hostname.yaml
+  tags: hostname
+
+# Install either systemd_boot or grub.
+# GRUB is the default.
+- import_tasks: systemd_boot.yaml
+  tags: systemd_boot
+  when: use_systemd_boot
+
+- import_tasks: grub.yaml
+  tags: grub
+  when: use_grub
+
+- import_tasks: user.yaml
+  tags: user
+
+- import_tasks: update_mkinitcpio.yaml
+  tags: update_mkinitcpio
+
+- import_tasks: boot_image.yaml
+  tags: boot_image
+
+# - name: Reboot
+#   reboot:
+#     connect_timeout: 1
+#     reboot_timeout: 1
+#   failed_when: false

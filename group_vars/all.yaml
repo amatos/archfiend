@@ -1,0 +1,87 @@
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: alberth
+
+ntpserver: ntp
+
+timezone: America/New_York
+crypto_container: cryptroot
+
+# Uncomment to use systemd-boot instead of GRUB
+# boot_loader: 'systemd-boot'
+
+# Used to collect the fastest mirrors for the installation
+country_code: US
+
+# User account that should be created on all hosts
+common_user:
+  name: alberth
+  password: '{{ credentials.user.alberth.password }}'
+  full: 'Alberth Matos'
+  email: alberth@matos.cc
+  ssh_pub_key: "/media/syncthing/ssh/internal.pub"
+
+encryption:
+  enabled: true
+  password: piggy
+
+btrfs:
+  enabled: true
+  subvols:
+    - sub: '@snapshots'
+      path: '.snapshots'
+    - sub: '@home'
+      path: 'home'
+    - sub: '@var_log'
+      path: 'var/log'
+    - sub: '@var_cache'
+      path: 'var/cache'
+    - sub: '@var_tmp'
+      path: 'var/tmp'
+    - sub: '@pkg'
+      path: 'var/cache/pacman/pkg'
+    - sub: '@var_lib_portables'
+      path: 'var/lib/portables'
+    - sub: '@var_lib_machines'
+      path: 'var/lib/machines'
+    - sub: '@media'
+      path: 'media'
+
+### The following is an example of how to configure manual partitions
+# manual_partitions:
+#   - boot: vda1
+#   - root: vda2
+
+credentials:
+  user:
+    alberth:
+      password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        62316336323332373930323933336535393263653039613134633537343839376132386532306532
+        3737303661393139303765653366333866393866646338380a653337353335663566646162373839
+        38383936646265353532323438393533616438376433616532653439663063626532663539623362
+        3838363665343133660a323762623035616335383733613835646165356666383961616166353563
+        3465
+    llewellyn:
+      password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        38626436643036373936386531373163363332356163326264326132623862376631643165303861
+        6539666334373961636632386338623933363536326532610a313531303830653261313733343064
+        37316236326331313561363365343838663930636239333135333932666335386466626363303134
+        6262333632613538640a323834393366376136353765366231303031653738323261393336623831
+        6337
+    root:
+      password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        32353633663165633862363438646432663137333232313333666263643963306136353137316433
+        3332326136343066626630303865346230343161333165310a653037303631333036343435386435
+        32663033646263333364383764333439623634613166636261666265396336663738323231306531
+        3462363338383835340a633932303362666234346561666235633331653164306130613335333434
+        6333
+  luks:
+    password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      35666563343264303336373763663432343262356537633531663139346263383437663738373061
+      3130643733313737663563626339363166643038336266310a383231633162613131653234366662
+      30643462616336396463616464666639336535376434643532333834383264366564393431343638
+      6134353431396365660a343863336338666431343236373362633765653430636431303137393865
+      6565

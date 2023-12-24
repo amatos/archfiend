@@ -1,0 +1,60 @@
+#https://wiki.archlinux.org/title/mirrors#Server-side_ranking
+- name: Use reflector to filter the 25 fastest mirrors that support HTTPS
+  shell: reflector --country {{ country_code }} --protocol https --sort rate --latest 25 --save /etc/pacman.d/mirrorlist
+  when: ansible_architecture != "aarch64"
+
+- name: PACMAN - Create mirrorlist for arm
+  copy:
+    dest: /etc/pacman.d/mirrorlist
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      Server = http://mirror.archlinuxarm.org/$arch/$repo
+  become: true
+  when: ansible_architecture == "aarch64"
+
+- name: PACMAN - Set config items
+  lineinfile:
+    path: /etc/pacman.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  become: true
+  loop:
+    - { regexp: '^(# *)?Color', line: 'Color'}
+    - { regexp: '^(# *)?ParallelDownloads', line: 'ParallelDownloads = 6\nILoveCandy'}
+
+- name: PACMAN - Enable multilib
+  replace:
+    dest: /etc/pacman.conf
+    regexp: '\#\[multilib\]\n\#Include = /etc/pacman\.d/mirrorlist'
+    replace: '[multilib]\nInclude = /etc/pacman.d/mirrorlist'
+  become: true
+
+- name: PACMAN - Disable compression of makepkg (aur packages)
+  lineinfile:
+    dest: /etc/makepkg.conf
+    regexp: '^PKGEXT='
+    line: "PKGEXT='.pkg.tar'"
+  become: true
+
+- name: PACMAN - Install git & base-devel
+  pacman:
+    name:
+      - git
+      - base-devel
+    update_cache: yes
+    state: present
+  become: true
+
+- name: PACMAN - Install paru
+  kewlfft.aur.aur:
+    use: makepkg
+    name: paru-bin
+    state: present
+
+- name: PACMAN - Install yay
+  kewlfft.aur.aur:
+    use: makepkg
+    name: yay
+    state: present

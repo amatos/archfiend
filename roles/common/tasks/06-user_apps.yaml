@@ -1,0 +1,67 @@
+- name: remove default apps
+  pacman:
+    name:
+      - skanlite
+      - kget
+      - cantata
+    state: absent
+  become: true
+
+- name: force remove clashing apps
+  pacman:
+    name:
+      - ttf-hack
+    force: yes
+    state: absent
+  become: true
+
+
+- name: install user apps
+  kewlfft.aur.aur:
+    name:
+      - thunderbird
+      - k3b
+      - kcalc
+      - yakuake
+      - konversation
+      - okular
+      - ark # archive manager
+      - barrier # network kvm software (mouse and keyboard over the network)
+      - visual-studio-code-bin # text editor / ide
+      - discord # chat app for gamers
+      - dolphin # file explorer
+      - firefox # work browser
+      - flameshot # screenshot tool
+      - freerdp # needed for remmina rdp
+      - gns3-server # network virtualisation tool
+      - gns3-gui # network virtualisation tool frontend
+      - google-earth-pro # used for kmz's
+      - gparted # gui partition manager
+      - gwenview # picture viewer
+      - ipscan # angry ip scanner
+      - libratbag # service for piper
+      - libvncserver # needed for remmina vnc
+      - obs-studio # capture screens and devices
+      - slack-desktop # native slack app
+      - spotify # music duuuuh
+      - streamlink # get livestreams in VLC or other client
+      - teams # native microsoft teams app
+      - virt-manager # libvirt gui manager
+      - winbox # add winbox app (wine bottled)
+      - wireguard-tools # to enable wireguard connections
+      - wireshark-qt # packet capture gui
+      - brave-bin # browser
+      - 1password # password manager
+      - 1password-cli # password manager cli
+      - vlc # video player
+      - yin-yang
+
+
+
+- name: enable services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  become: true
+  loop:
+    - libvirtd

@@ -1,0 +1,8 @@
+- name: encrypt drive
+  community.crypto.luks_device:
+    device: "{{ root_part }}"
+    state: "opened"
+    name: cryptroot
+    label: "{{ crypto_container }}"
+    type: luks2
+    passphrase: "{{ credentials.luks.password }}"

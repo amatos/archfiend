@@ -1,0 +1,24 @@
+- import_tasks: 01-system.yaml
+  tags: system, arm_setup
+
+- import_tasks: 02-user.yaml
+  tags: user
+
+- import_tasks: 03-pacman.yaml
+  tags: pacman
+
+- name: upgrade all packages
+  kewlfft.aur.aur:
+    upgrade: yes
+  tags: upgrade
+
+- import_tasks: 04-terminal.yaml
+  tags: terminal
+
+- import_tasks: 05-graphical.yaml
+  tags: graphical
+  when: ansible_architecture != "aarch64"
+
+- import_tasks: 06-user_apps.yaml
+  tags: user_apps
+  when: ansible_architecture != "aarch64"

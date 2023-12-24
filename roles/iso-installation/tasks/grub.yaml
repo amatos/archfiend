@@ -1,0 +1,19 @@
+# https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system#Encrypted_boot_partition_(GRUB)
+- name: setup grub for encryption
+  lineinfile:
+    dest: /mnt/etc/default/grub
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regex: "^#?GRUB_ENABLE_CRYPTODISK", line: "GRUB_ENABLE_CRYPTODISK=y"}
+    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ root_part }}:cryptroot:allow-discards"'}
+    - { regex: "^#?GRUB_CMDLINE_LINUX_DEFAULT", line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"'}
+    - { regex: "^#?GRUB_DISABLE_OS_PROBER", line: "GRUB_DISABLE_OS_PROBER=false"}
+  when: use_encryption
+
+# https://wiki.archlinux.org/title/GRUB#UEFI_systems
+- name: Install grub
+  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB-ARCH
+
+- name: Create grub config
+  command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg

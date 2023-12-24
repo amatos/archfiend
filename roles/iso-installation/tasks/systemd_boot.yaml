@@ -1,0 +1,45 @@
+- name: Install systemd-boot
+  command: arch-chroot /mnt bootctl install
+
+- name: Get root filesystem UUID
+  command: blkid -o value -s UUID {{ root_part }}
+  register: root_filesystem_uuid
+  changed_when: false
+  failed_when: false
+
+- name: Get root filesystem label
+  command: blkid -o value -s LABEL {{ root_part }}
+  register: root_filesystem_label
+  changed_when: false
+  failed_when: false
+
+- name: Get root filesystem PARTUUID
+  command: blkid -o value -s PARTUUID {{ root_part }}
+  register: root_filesystem_partuuid
+  changed_when: false
+  failed_when: false
+
+- name: Create crypto command line for boot
+  blockinfile:
+    path: /mnt/etc/cmdline.d/crypto.conf
+    create: true
+    mode: 0644
+    owner: root
+    group: root
+    block: |
+      cryptdevice=LABEL={{ crypto_container }}:root
+  become: true
+  when: use_encryption
+
+- name: Create root command line for boot
+  blockinfile:
+    path: /mnt/etc/cmdline.d/root.conf
+    create: true
+    mode: 0644
+    owner: root
+    group: root
+    block: |
+      root=LABEL=root
+      rootflags=subvol=@ rw
+      rootfstype=btrfs
+  become: true

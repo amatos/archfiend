@@ -1,0 +1,88 @@
+- name: SYSTEM - Install default packages
+  pacman:
+    name:
+      - sudo
+      - ntp
+      - openssh
+      - base
+      - base-devel
+      - networkmanager
+      - zsh
+    update_cache: yes
+  become: true
+
+- name: SYSTEM - Give passwordless sudo access to wheel group
+  copy:
+    content: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    dest: /etc/sudoers.d/wheel
+    validate: /usr/sbin/visudo --check --file=%s
+  become: true
+
+- name: SYSTEM - Sync time to local ntp server
+  command: ntpdate -u {{ ntpserver }}
+  become: true
+
+- name: SYSTEM - Start & enable services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - systemd-timesyncd
+    - sshd
+    - NetworkManager
+  become: true
+
+- name: SYSTEM - Stop & disable networkd
+  systemd:
+    name: systemd-networkd
+    state: stopped
+    enabled: no
+  become: true
+
+- name: SYSTEM - Install intel-ucode if needed
+  pacman:
+    name:
+      - intel-ucode # ucode for intel cpus
+      - vulkan-intel # vulkan support for intel gpu's
+    update_cache: yes
+  when: ansible_processor[1].find('Intel') != -1
+  become: true
+
+- name: SYSTEM - Install amd-ucode if needed
+  pacman:
+    name:
+      - amd-ucode # ucode for amd
+      - vulkan-radeon # vulkan support for amd gpu's
+      - radeontop # radeon gpu info
+    update_cache: yes
+  when: ansible_processor[1].find('AMD') != -1
+  become: true
+
+- name: SYSTEM - Install inetutils for hostname set
+  pacman:
+    name:
+      - inetutils
+  become: true
+
+- name: SYSTEM - Set hostname
+  hostname:
+    name: "{{ hostname }}"
+  become: true
+
+- name: SYSTEM - Set hostname in hosts file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ^127.0.1.1
+    line: '127.0.1.1        {{ hostname }} {{ hostname }}.localdomain'
+  become: true
+
+- name: SYSTEM - Generate en_US locale
+  lineinfile:
+    dest: /etc/locale.gen
+    line: 'en_US.UTF-8 UTF-8'
+  become: true
+
+- name: SYSTEM - generate locales
+  command: locale-gen
+  become: true

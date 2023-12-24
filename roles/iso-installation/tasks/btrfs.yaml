@@ -1,0 +1,43 @@
+# https://wiki.archlinux.org/title/btrfs
+
+- name: create root
+  command: btrfs subvolume create /mnt/@
+
+- name: create other subvols
+  command: btrfs subvolume create /mnt/{{ item.sub }}
+  loop: "{{ btrfs.subvols }}"
+
+- name: unmount /mnt
+  mount:
+    path: /mnt
+    state: unmounted
+
+- name: mount btrfs root subvolume
+  mount:
+    path: /mnt
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
+    fstype: btrfs
+    opts: "compress=zstd,discard=async,subvol=@"
+    state: mounted
+
+- name: Create mountpoint for btrfs subvolumes
+  file:
+    path: /mnt/{{ item.path }}
+    state: directory
+  loop: "{{ btrfs.subvols }}"
+
+- name: mount btrfs subvolumes
+  mount:
+    path: /mnt/{{ item.path }}
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
+    fstype: btrfs
+    opts: "compress=zstd,discard=async,subvol={{ item.sub }}"
+    state: mounted
+  loop: "{{ btrfs.subvols }}"
+
+- name: disable CoW for subvols with disable_cow = true
+  file:
+    path: /mnt/{{ item.path }}
+    attributes: C
+  loop: "{{ btrfs.subvols }}"
+  when: item.disable_cow|default(false)

@@ -1,0 +1,16 @@
+#https://wiki.archlinux.org/title/mirrors#Server-side_ranking
+- name: Use reflector to filter the 25 fastest mirrors that support HTTPS
+  shell: reflector --country {{ country_code }} --protocol https --sort rate --latest 25 --save /etc/pacman.d/mirrorlist
+
+- name: Run pacstrap
+  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs os-prober plymouth
+  tags:
+    - pacstrap
+
+- name: install Intel microcode
+  command: arch-chroot /mnt pacman -S intel-ucode --noconfirm
+  when: ansible_processor[1].find('Intel') != -1
+
+- name: install AMD microcode
+  command: arch-chroot /mnt pacman -S amd-ucode --noconfirm
+  when: ansible_processor[1].find('AMD') != -1

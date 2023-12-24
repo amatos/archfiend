@@ -1,0 +1,10 @@
+### NOTA BENE: You MUST update install_drive to match the device on which you want to install Arch Linux.
+iso_install:
+  hosts:
+    arch_iso:
+      ansible_host: archiso.home.matos.cc
+      ansible_user: root
+      ansible_ssh_pass: "{{ credentials.user.root.password }}"
+      install_drive: /dev/sda
+      hostname: gammuvm
+

@@ -1,0 +1,3 @@
+# Ignore ansible vault
+.vault_password
+vault.yaml

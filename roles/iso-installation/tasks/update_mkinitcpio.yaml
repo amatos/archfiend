@@ -1,0 +1,32 @@
+- name: Update mkinitcpio preset to use UKI
+  block:
+    - name: Comment out default_image
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^default_image="/boot/initramfs-linux.img"
+        line: '#default_image="/boot/initramfs-linux.img"'
+    - name: Uncomment UKI
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^#default_uki="/efi/EFI/Linux/arch-linux.efi"
+        line: 'default_uki="/efi/EFI/Linux/arch-linux.efi"'
+    - name: Uncomment default options
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^#default_options="--splash /usr/share/systemd/bootctl/splash-arch.bmp"
+        line: 'default_options="--splash /usr/share/systemd/bootctl/splash-arch.bmp"'
+    - name: Comment out fallback image
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^fallback_image="/boot/initramfs-linux-fallback.img"
+        line: '#fallback_image="/boot/initramfs-linux-fallback.img"'
+    - name: Uncomment fallback UKI
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^#fallback_uki="/efi/EFI/Linux/arch-linux-fallback.efi"
+        line: 'fallback_uki="/efi/EFI/Linux/arch-linux-fallback.efi"'
+    - name: Uncomment fallback options
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.d/linux.preset
+        regexp: ^fallback_options="-S autodetect"
+        line: 'fallback_options="-S autodetect --splash /usr/share/systemd/bootctl/splash-arch.bmp"'

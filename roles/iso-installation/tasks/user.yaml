@@ -1,0 +1,28 @@
+- name: Create user account
+  command: arch-chroot /mnt useradd -s /bin/bash -m --user-group -G wheel {{ common_user.name }}
+
+- name: Create user password
+  command: arch-chroot /mnt sh -c 'echo {{ common_user.name }}:{{ common_user.password }} | chpasswd'
+
+- name: Create user's ssh directory
+  file:
+    path: /mnt/home/{{ common_user.name }}/.ssh
+    state: directory
+    mode: 0700
+
+- name: Copy over ssh key from current Ansible controller as an authorized key
+  copy:
+    content: "{{ common_user.ssh_pub_key }}"
+    dest: /mnt/home/{{ common_user.name }}/.ssh/authorized_keys
+    mode: 0600
+  tags:
+    - ssh
+    - user
+- name: Set mode, owner, and group on user's authorized_key file
+  command: arch-chroot /mnt chown -R {{ common_user.name }}:{{ common_user.name }} /home/{{ common_user.name }}/.ssh/
+
+- name: Give passwordless sudo access to wheel group
+  copy:
+    content: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    dest: /mnt/etc/sudoers.d/wheel
+    validate: /usr/sbin/visudo --check --file=%s

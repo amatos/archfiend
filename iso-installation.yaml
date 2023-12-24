@@ -1,0 +1,5 @@
+# This playbook is used to install the ISO image on the target machine.
+# Further configuration is done by the post-installation playbook common.yaml.
+- hosts: iso_install
+  roles:
+    - iso-installation

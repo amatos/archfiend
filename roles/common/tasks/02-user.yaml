@@ -1,0 +1,52 @@
+- name: USER - Create account
+  user:
+    name: "{{ common_user.name }}"
+    comment: "{{ common_user.full }}"
+    groups: wheel
+    append: yes
+    shell: /bin/zsh
+    password: "{{ common_user.password | string | password_hash('sha512') }}"
+    update_password: on_create
+  become: true
+  tags: arm_setup
+
+- name: USER - Set authorized_keys
+  authorized_key:
+    user: "{{ common_user.name }}"
+    state: present
+    key: "{{ lookup('file', common_user.ssh_pub_key) }}"
+  become: true
+  tags: arm_setup
+
+- name: USER - Change SSH daemon settings
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
+  become: true
+  loop:
+    - { regexp: '^(# *)?PermitRootLogin', line: 'PermitRootLogin no'}
+    - { regexp: '^(# *)?UsePAM ', line: 'UsePAM yes'}
+    - { regexp: '^(# *)?PasswordAuthentication ', line: 'PasswordAuthentication yes'}
+    - { regexp: '^(# *)?PermitEmptyPasswords ', line: 'PermitEmptyPasswords no'}
+    - { regexp: '^(# *)?ChallengeResponseAuthentication ', line: 'ChallengeResponseAuthentication no'}
+  notify:
+    - restart sshd
+  tags: arm_setup
+
+- name: USER - remove alarm user on arm arch
+  user:
+    name: "alarm"
+    state: absent
+    remove: yes
+    force: yes
+  become: true
+  tags: arm_setup
+
+- name: USER - update root account password (when running from arm arch, root account has default password)
+  user:
+    name: "root"
+    password: "{{ credentials.user.root.password | string | password_hash('sha512') }}"
+  become: true
+  tags: arm_setup

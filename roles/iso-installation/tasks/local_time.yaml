@@ -1,0 +1,5 @@
+- name: Set local timezone
+  command: arch-chroot /mnt ln -sf /usr/share/zoneinfo/{{ timezone }} /etc/localtime
+
+- name: Generate adjtime file
+  command: arch-chroot /mnt hwclock --systohc

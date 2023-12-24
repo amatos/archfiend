@@ -1,0 +1,50 @@
+- name: TERMINAL - install terminal apps
+  kewlfft.aur.aur:
+    name:
+      - cups # printing services
+      - avahi # network discovery
+      - avahi-utils # avahi-browse
+      - nss-mdns # avahi-browse
+      - dmidecode # bios info
+      - fwupd # fwupdmgr get-devices
+      - htop # hardware usage/processes in cli
+      - btop # htop alternative
+      - gdu # storage info (ncdu alternative)
+      - neofetch # pretty sys info
+      - oh-my-zsh-git # zsh the way it should be
+      - paru-bin # aur helper
+      - yay
+      - powertop # info on powerusage
+      - syncthing # sync config files
+      - tlp # battery life optimizations (install and forget)
+      - unzip # oposite of zip
+      - lhasa # lzx compression
+      - usbutils # lsusb
+      - vim # vim
+      - vi-vim-symlink # vim links for vi
+      - youtube-dl # download videos from the net
+      - zsh # shell
+      - fish # shell
+
+- name: TERMINAL - Install app groups
+  include_tasks: "groups/{{ item }}.yaml"
+  tags: always
+  loop:
+    - ansible
+    - docker
+    - networking
+    - virtualisation
+
+- name: TERMINAL - Setup app tasks
+  include_tasks: "app_tasks/{{ item }}.yaml"
+  tags: always
+  loop:
+    - syncthing
+    - terminal
+
+- name: TERMINAL - Update nsswitch
+  replace:
+    dest: /etc/nsswitch.conf
+    regexp: 'hosts: mymachines resolve \[\!UNAVAIL=return\] files myhostname dns'
+    replace: 'hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns'
+  become: true
